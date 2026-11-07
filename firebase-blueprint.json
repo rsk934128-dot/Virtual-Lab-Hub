@@ -1,0 +1,87 @@
+{
+  "entities": {
+    "UserProfile": {
+      "title": "UserProfile",
+      "description": "User profile with display name and metadata",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "description": "User UID matching auth"
+        },
+        "displayName": {
+          "type": "string",
+          "description": "Display name of the user"
+        },
+        "email": {
+          "type": "string",
+          "description": "User email address"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Creation timestamp via serverTimestamp"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Update timestamp via serverTimestamp"
+        }
+      },
+      "required": ["userId", "displayName", "createdAt"]
+    },
+    "LabSession": {
+      "title": "LabSession",
+      "description": "Developer virtual container sandbox session or environment instance",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique session ID"
+        },
+        "userId": {
+          "type": "string",
+          "description": "Owner user UID"
+        },
+        "title": {
+          "type": "string",
+          "description": "Session or sandbox title"
+        },
+        "description": {
+          "type": "string",
+          "description": "Description of the lab environment"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["active", "paused", "stopped"],
+          "description": "Current status of the sandbox session"
+        },
+        "runtimeType": {
+          "type": "string",
+          "description": "Runtime container environment type (e.g. android-container, linux-sandbox, asterisk-bridge)"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp of creation"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp of last update"
+        }
+      },
+      "required": ["userId", "title", "status", "runtimeType", "createdAt"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "UserProfile",
+      "description": "User profiles partitioned by user ID"
+    },
+    "/users/{userId}/sessions/{sessionId}": {
+      "schema": "LabSession",
+      "description": "User's sandboxed virtual container sessions"
+    }
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "name": "Virtual Lab Hub",
+  "description": "Developer Virtual Lab Environment & Cloud Dashboard",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
