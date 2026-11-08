@@ -25,22 +25,37 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: '17'
-          cache: 'gradle'
 
-      - name: Grant Execute Permission for Gradle
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Ensure Gradle Wrapper exists
         run: |
-          if [ -f gradlew ]; then
-            chmod +x gradlew
+          if [ ! -f gradlew ]; then
+            echo "Generating Gradle wrapper..."
+            gradle wrapper
           fi
+          chmod +x gradlew
 
-      - name: Create Mock Debug Keystore if missing
+      - name: Prepare Signing Keystores for CI
         run: |
+          # 1. Prepare Debug Keystore
           if [ ! -f debug.keystore ]; then
-            echo "Generating debug keystore for CI build..."
+            echo "Generating debug keystore..."
             keytool -genkey -v -keystore debug.keystore -alias androiddebugkey -storepass android -keypass android -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Android Debug,O=Android,C=US"
           fi
 
+          # 2. Prepare Release Keystore fallback if secrets are not provided
+          if [ ! -f my-upload-key.jks ]; then
+            echo "Generating CI upload keystore..."
+            keytool -genkey -v -keystore my-upload-key.jks -alias upload -storepass android -keypass android -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Virtual Lab Release,O=VirtualLab,C=US"
+          fi
+
       - name: Build APK with Gradle
+        env:
+          KEYSTORE_PATH: ${{ github.workspace }}/my-upload-key.jks
+          STORE_PASSWORD: android
+          KEY_PASSWORD: android
         run: |
           ./gradlew assembleRelease --stacktrace || ./gradlew assembleDebug --stacktrace
 
@@ -48,6 +63,10 @@ jobs:
         id: find_apk
         run: |
           APK_PATH=$(find app/build/outputs/apk/ -name "*.apk" | head -n 1)
+          if [ -z "$APK_PATH" ]; then
+            echo "Error: No APK file generated!"
+            exit 1
+          fi
           echo "Found APK at: $APK_PATH"
           echo "apk_path=$APK_PATH" >> $GITHUB_OUTPUT
 
