@@ -88,6 +88,7 @@ fun AppRoot() {
   }
 
   var showSettings by remember { mutableStateOf(false) }
+  var showStatusScreen by remember { mutableStateOf(false) }
   var activeLiveApp by remember { mutableStateOf<com.virtuallab.app.ui.components.ExtractedAppInfo?>(null) }
 
   val user = currentUser
@@ -102,6 +103,13 @@ fun AppRoot() {
       appInfo = activeLiveApp!!,
       onClose = { activeLiveApp = null }
     )
+  } else if (showStatusScreen) {
+    com.virtuallab.app.ui.status.VirtualEnvironmentStatusScreen(
+      onNavigateBack = { showStatusScreen = false },
+      onLaunchAiTroubleshoot = { _, _ ->
+        showStatusScreen = false
+      }
+    )
   } else if (showSettings) {
     com.virtuallab.app.ui.settings.VirtualSettingsScreen(
       onNavigateBack = { showSettings = false }
@@ -111,6 +119,7 @@ fun AppRoot() {
       currentUser = user,
       repository = repository,
       onNavigateToSettings = { showSettings = true },
+      onNavigateToStatus = { showStatusScreen = true },
       onLaunchLiveApp = { appInfo -> activeLiveApp = appInfo }
     )
   }

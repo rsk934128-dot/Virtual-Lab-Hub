@@ -22,6 +22,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.DeveloperBoard
+import androidx.compose.material.icons.filled.Dns
 import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Refresh
@@ -60,6 +61,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.credentials.CredentialManager
 import com.google.firebase.auth.FirebaseUser
 import com.virtuallab.app.data.model.LabSession
@@ -128,6 +130,7 @@ fun LabDashboardScreen(
   currentUser: FirebaseUser,
   repository: LabRepository,
   onNavigateToSettings: () -> Unit = {},
+  onNavigateToStatus: () -> Unit = {},
   onLaunchLiveApp: (com.virtuallab.app.ui.components.ExtractedAppInfo) -> Unit = {}
 ) {
   val context = LocalContext.current
@@ -155,6 +158,16 @@ fun LabDashboardScreen(
           }
         },
         actions = {
+          IconButton(
+            onClick = onNavigateToStatus,
+            modifier = Modifier.testTag("open_status_screen_button")
+          ) {
+            Icon(
+              imageVector = Icons.Default.Dns,
+              contentDescription = "Environment Status Monitor"
+            )
+          }
+
           IconButton(
             onClick = onNavigateToSettings,
             modifier = Modifier.testTag("open_settings_button")
@@ -237,7 +250,10 @@ fun LabDashboardScreen(
               verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
               item {
-                StatusBanner(sessionCount = state.sessions.size)
+                StatusBanner(
+                  sessionCount = state.sessions.size,
+                  onOpenStatus = onNavigateToStatus
+                )
               }
               item {
                 com.virtuallab.app.ui.components.ZipAppLauncherCard(
@@ -325,9 +341,15 @@ fun LabDashboardScreen(
 }
 
 @Composable
-fun StatusBanner(sessionCount: Int) {
+fun StatusBanner(
+  sessionCount: Int,
+  onOpenStatus: () -> Unit = {}
+) {
   Card(
-    modifier = Modifier.fillMaxWidth(),
+    onClick = onOpenStatus,
+    modifier = Modifier
+      .fillMaxWidth()
+      .testTag("dashboard_status_banner_card"),
     shape = RoundedCornerShape(16.dp),
     colors = CardDefaults.cardColors(
       containerColor = MaterialTheme.colorScheme.secondaryContainer
@@ -337,33 +359,49 @@ fun StatusBanner(sessionCount: Int) {
       modifier = Modifier
         .fillMaxWidth()
         .padding(16.dp),
+      horizontalArrangement = Arrangement.SpaceBetween,
       verticalAlignment = Alignment.CenterVertically
     ) {
-      Box(
-        modifier = Modifier
-          .size(44.dp)
-          .clip(CircleShape)
-          .background(MaterialTheme.colorScheme.secondary),
-        contentAlignment = Alignment.Center
-      ) {
-        Icon(
-          imageVector = Icons.Default.DeveloperBoard,
-          contentDescription = null,
-          tint = MaterialTheme.colorScheme.onSecondary,
-          modifier = Modifier.size(24.dp)
-        )
+      Row(verticalAlignment = Alignment.CenterVertically) {
+        Box(
+          modifier = Modifier
+            .size(44.dp)
+            .clip(CircleShape)
+            .background(MaterialTheme.colorScheme.secondary),
+          contentAlignment = Alignment.Center
+        ) {
+          Icon(
+            imageVector = Icons.Default.DeveloperBoard,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.onSecondary,
+            modifier = Modifier.size(24.dp)
+          )
+        }
+        Spacer(modifier = Modifier.width(16.dp))
+        Column {
+          Text(
+            text = "Active Cloud Sandbox Pods",
+            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
+            color = MaterialTheme.colorScheme.onSecondaryContainer
+          )
+          Text(
+            text = "$sessionCount isolated environment instance(s) running",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.8f)
+          )
+        }
       }
-      Spacer(modifier = Modifier.width(16.dp))
-      Column {
+
+      Surface(
+        shape = RoundedCornerShape(8.dp),
+        color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.15f)
+      ) {
         Text(
-          text = "Active Cloud Sandbox Pods",
-          style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
-          color = MaterialTheme.colorScheme.onSecondaryContainer
-        )
-        Text(
-          text = "$sessionCount isolated environment instance(s) running",
-          style = MaterialTheme.typography.bodySmall,
-          color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.8f)
+          text = "স্ট্যাটাস →",
+          fontSize = 11.sp,
+          fontWeight = FontWeight.Bold,
+          color = MaterialTheme.colorScheme.onSecondaryContainer,
+          modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
         )
       }
     }
