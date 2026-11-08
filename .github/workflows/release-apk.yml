@@ -37,6 +37,63 @@ jobs:
           fi
           chmod +x gradlew
 
+      - name: Ensure google-services.json exists
+        run: |
+          if [ ! -f app/google-services.json ]; then
+            echo "Restoring app/google-services.json for CI..."
+            mkdir -p app
+            cat << 'EOF' > app/google-services.json
+{
+  "project_info": {
+    "project_number": "1049410601688",
+    "project_id": "gen-lang-client-0838741245",
+    "storage_bucket": "gen-lang-client-0838741245.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1049410601688:android:693c2f41e995f89ec38dad",
+        "android_client_info": {
+          "package_name": "com.virtuallab.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1049410601688-1jnbmu0fgsbou6a6q9g401psociqu0oa.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.virtuallab.app",
+            "certificate_hash": "c6d2fb814a4a9b63e68980886d8cd53645f68fb9"
+          }
+        },
+        {
+          "client_id": "1049410601688-5f2mvgetelqfa6i46evkh2lhfgk4qbj0.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCTW7OjqCRg2M9cTMXSWBbw7et2o04UAto"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1049410601688-5f2mvgetelqfa6i46evkh2lhfgk4qbj0.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
+EOF
+          fi
+          echo "Verified app/google-services.json exists."
+
       - name: Prepare Signing Keystores for CI
         run: |
           # 1. Prepare Debug Keystore
@@ -56,6 +113,7 @@ jobs:
           KEYSTORE_PATH: ${{ github.workspace }}/my-upload-key.jks
           STORE_PASSWORD: android
           KEY_PASSWORD: android
+          JAVA_TOOL_OPTIONS: "-Djava.awt.headless=true"
         run: |
           ./gradlew assembleRelease --stacktrace || ./gradlew assembleDebug --stacktrace
 
