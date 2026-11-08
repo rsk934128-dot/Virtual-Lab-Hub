@@ -7,7 +7,7 @@ import com.google.firebase.firestore.ServerTimestamp
 
 @IgnoreExtraProperties
 data class UserProfile(
-  @DocumentId val userId: String = "",
+  val userId: String = "",
   val displayName: String = "",
   val email: String? = null,
   @ServerTimestamp val createdAt: Timestamp? = null,

@@ -33,6 +33,7 @@ import kotlinx.coroutines.launch
 class MainActivity : ComponentActivity() {
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
+    com.virtuallab.app.ai.configureAppCheck(this, intent)
     com.virtuallab.app.virtual.VirtualCore.init(applicationContext)
     enableEdgeToEdge()
     setContent {

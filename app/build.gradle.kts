@@ -1,5 +1,6 @@
 import com.google.gms.googleservices.GoogleServicesPlugin.MissingGoogleServicesStrategy
 import java.time.Duration
+import java.nio.file.Files
 
 plugins {
   alias(libs.plugins.android.application)
@@ -64,7 +65,32 @@ android {
     compose = true
     buildConfig = true
   }
-  testOptions { unitTests { isIncludeAndroidResources = true } }
+  testOptions {
+    unitTests {
+      isIncludeAndroidResources = true
+      all {
+        val robolectricDir = file("${project.rootDir}/.robolectric-jars")
+        if (!robolectricDir.exists()) {
+          robolectricDir.mkdirs()
+          val sourceJar = file("/home/appuser/.m2/repository/org/robolectric/android-all-instrumented/16-robolectric-13921718-i7/android-all-instrumented-16-robolectric-13921718-i7.jar")
+          if (sourceJar.exists()) {
+            listOf("android-all-16-robolectric-13921718-i7.jar", "android-all-instrumented-16-robolectric-13921718-i7.jar", "android-all-16.jar", "android-all-36.jar").forEach { name ->
+              val dest = file("$robolectricDir/$name")
+              if (!dest.exists()) {
+                try {
+                  Files.createSymbolicLink(dest.toPath(), sourceJar.toPath())
+                } catch (ignored: Exception) {
+                  // Fallback if symlink fails
+                }
+              }
+            }
+          }
+        }
+        it.systemProperty("robolectric.offline", "true")
+        it.systemProperty("robolectric.dependency.dir", robolectricDir.absolutePath)
+      }
+    }
+  }
   dependenciesInfo {
     includeInApk = false
     includeInBundle = true

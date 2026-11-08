@@ -145,10 +145,72 @@ object VirtualCore {
     return sessionDir
   }
 
+  private val runningContainers = mutableSetOf<String>()
+
+  /**
+   * Starts an isolated virtual Android container session.
+   */
+  fun startContainer(sessionId: String): Boolean {
+    val sandbox = allocateSandbox(sessionId) ?: return false
+    synchronized(runningContainers) {
+      runningContainers.add(sessionId)
+    }
+    postLog(
+      LogLevel.INFO,
+      "VirtualCore",
+      "Started virtual container session",
+      "Session: $sessionId (Workspace: ${sandbox.name})"
+    )
+    return true
+  }
+
+  /**
+   * Stops a running virtual Android container session.
+   */
+  fun stopContainer(sessionId: String): Boolean {
+    val wasRunning: Boolean
+    synchronized(runningContainers) {
+      wasRunning = runningContainers.remove(sessionId)
+    }
+    postLog(
+      LogLevel.WARN,
+      "VirtualCore",
+      "Stopped virtual container session",
+      "Session: $sessionId (Previous state: ${if (wasRunning) "RUNNING" else "STOPPED"})"
+    )
+    return true
+  }
+
+  /**
+   * Checks if a specific container session is currently running.
+   */
+  fun isContainerRunning(sessionId: String): Boolean {
+    synchronized(runningContainers) {
+      return runningContainers.contains(sessionId)
+    }
+  }
+
+  /**
+   * Returns a status string description for a given container.
+   */
+  fun getContainerStatus(sessionId: String): String {
+    return if (isContainerRunning(sessionId)) "RUNNING" else "STOPPED"
+  }
+
+  /**
+   * Returns list of currently active running container session IDs.
+   */
+  fun getRunningContainers(): List<String> {
+    synchronized(runningContainers) {
+      return runningContainers.toList()
+    }
+  }
+
   /**
    * Deallocates and cleans up the sandbox workspace.
    */
   fun purgeSandbox(sessionId: String): Boolean {
+    stopContainer(sessionId)
     val root = sandboxRootDir ?: return false
     val sessionDir = File(root, sessionId)
     val deleted = if (sessionDir.exists()) sessionDir.deleteRecursively() else true

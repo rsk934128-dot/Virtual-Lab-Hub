@@ -246,6 +246,29 @@ fun LabDashboardScreen(
                 )
               }
               item {
+                val fileExplorerService = remember { com.virtuallab.app.virtual.FileExplorerService(context) }
+                com.virtuallab.app.ui.components.FileExplorerCard(
+                  fileExplorerService = fileExplorerService,
+                  onOpenLab = onLaunchLiveApp,
+                  modifier = Modifier.fillMaxWidth()
+                )
+              }
+              item {
+                com.virtuallab.app.ui.components.VirtualLabAiAssistantWorkbench(
+                  modifier = Modifier.fillMaxWidth()
+                )
+              }
+              item {
+                com.virtuallab.app.ui.components.AiNativeTerminalWorkbench(
+                  modifier = Modifier.fillMaxWidth()
+                )
+              }
+              item {
+                com.virtuallab.app.ui.components.AiCodeReviewWorkbench(
+                  modifier = Modifier.fillMaxWidth()
+                )
+              }
+              item {
                 com.virtuallab.app.ui.components.VirtualEnvironmentManager(
                   modifier = Modifier.fillMaxWidth()
                 )

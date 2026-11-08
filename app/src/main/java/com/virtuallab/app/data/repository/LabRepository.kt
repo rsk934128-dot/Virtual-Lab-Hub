@@ -64,7 +64,10 @@ class LabRepository(private val db: FirebaseFirestore) {
     emitAll(
       docRef.snapshots()
         .map { snapshot ->
-          if (snapshot.exists()) snapshot.toObject(UserProfile::class.java) else null
+          if (snapshot.exists()) {
+            val profile = snapshot.toObject(UserProfile::class.java)
+            profile?.copy(userId = profile.userId.ifBlank { snapshot.id })
+          } else null
         }
         .catch { error ->
           val firestoreError = generateSequence(error) { it.cause }

@@ -84,6 +84,11 @@ object VirtualSystemCatalog {
     val updated = _activeProfiles.value.map { profile ->
       if (profile.id == profileId) {
         val willRun = !profile.isRunning
+        if (willRun) {
+          VirtualCore.startContainer(profile.id)
+        } else {
+          VirtualCore.stopContainer(profile.id)
+        }
         VirtualCore.postLog(
           if (willRun) LogLevel.INFO else LogLevel.WARN,
           "ContainerVM",
